@@ -47,6 +47,20 @@ const jobSchema = new mongoose.Schema({
         trim: true,
         length: [3, 100]
     },
+    applicationDeadline:{
+        type: Date,
+        required: true,
+         validate: {
+        validator: function (value) {
+            return value > Date.now();
+        },
+        message: "Application deadline cannot be in the past"
+    },
+ },
+ isArchived: {
+    type: Boolean,
+    default: false
+},
 
 },
 {
