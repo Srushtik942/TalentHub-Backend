@@ -1,36 +1,40 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User.model");
+const User = require("../models/NaukriAspirant.model");
 const expres = require("express");
 const router = expres.Router();
 
-
+// Register for user/student
 router.post('/register',async(req,res)=>{
     try{
-        const {name,email,password,experience,location,Skills,resume} = req.body;
+        const {fullName,email,password,role,experience,location,skills,resume,companyName,website,about} = req.body;
         const existingUser = await User.findOne({email});
         if(existingUser){
             return res.status(400).json({message:"User already exists"});
         }
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new User({
-            name,
+            fullName,
             email,
             password: hashedPassword,
+            role,
             experience,
             location,
-            Skills,
-            resume
+            skills,
+            resume,
+            companyName,
+            website,
+            about
         });
         await user.save();
 
          const token = jwt.sign(
-            { id: user._id, email: user.email },
+            { id: user._id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        res.status(201).json({message:"User created successfully", token, user: { id: user._id, name: user.name, email: user.email, experience: user.experience, location: user.location, Skills: user.Skills, resume: user.resume } });
+        res.status(201).json({message:"User created successfully", token, user: { id: user._id, fullName: user.fullName, email: user.email, experience: user.experience, role: user.role, location: user.location, skills: user.skills, resume: user.resume , companyName: user.companyName, website: user.website, about: user.about } });
 
     }catch(err){
         res.status(500).json({message:"Internal server error",err:err.message});
@@ -59,11 +63,11 @@ router.post('/login',async(req,res)=>{
         }
 
         const token = jwt.sign(
-            {id:user._id, email:user.email},
+            {id:user._id, email:user.email, role: user.role},
             process.env.JWT_SECRET,
             {expiresIn:'1h'}
         )
-    res.status(200).json({message:"Login successful",token, user:{id:user._id, name:user.name, email:user.email}});
+    res.status(200).json({message:"Login successful",token, user:{id:user._id, fullName:user.fullName, email:user.email, role: user.role}});
 
     }catch(err){
         res.status(500).json({message:"Internal server error",err:err.message});
