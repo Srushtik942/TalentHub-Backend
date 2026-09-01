@@ -7,6 +7,7 @@ const {initializeDb} = require("./db/db.connect");
 const authRoutes = require("./helperFunctions/Auth");
 const {requireAuth} = require("./auth/auth");
 const recruiterRoutes = require("./routes/recruiter.routes");
+const applicantRoutes = require("./routes/applicant.routes");
 dotenv.config();
 app.use(cors());
 app.use(express.json());
@@ -19,8 +20,8 @@ app.use("/api/auth",authRoutes);
 // Recruiter routes
 app.use("/api/recruiter",requireAuth,recruiterRoutes);
 
-
-
+// Applicant routes
+app.use("/api/applicant",requireAuth,applicantRoutes);
 
 
 async function startServer(){

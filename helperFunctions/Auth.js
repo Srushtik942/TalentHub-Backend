@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/NaukriAspirant.model");
+const NaukriAspirant = require("../models/NaukriAspirant.model");
 const expres = require("express");
 const router = expres.Router();
 
@@ -8,12 +8,12 @@ const router = expres.Router();
 router.post('/register',async(req,res)=>{
     try{
         const {fullName,email,password,role,experience,location,skills,resume,companyName,website,about} = req.body;
-        const existingUser = await User.findOne({email});
+        const existingUser = await NaukriAspirant.findOne({email});
         if(existingUser){
             return res.status(400).json({message:"User already exists"});
         }
         const hashedPassword = await bcrypt.hash(password, 12);
-        const user = new User({
+        const user = new NaukriAspirant({
             fullName,
             email,
             password: hashedPassword,
@@ -26,13 +26,16 @@ router.post('/register',async(req,res)=>{
             website,
             about
         });
-        await user.save();
+        console.log("user data is coming", user);
 
+        await user.save();
+// console.log("userData",userData);
          const token = jwt.sign(
             { id: user._id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+        console.log("token is coming", token);
 
         res.status(201).json({message:"User created successfully", token, user: { id: user._id, fullName: user.fullName, email: user.email, experience: user.experience, role: user.role, location: user.location, skills: user.skills, resume: user.resume , companyName: user.companyName, website: user.website, about: user.about } });
 
@@ -49,7 +52,7 @@ router.post('/login',async(req,res)=>{
             return res.status(400).json({message:"Email and password are required"});
         }
 
-        const user = await User.findOne({email});
+        const user = await NaukriAspirant.findOne({email});
 
 
         if(!user){

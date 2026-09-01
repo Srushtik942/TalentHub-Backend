@@ -67,7 +67,6 @@ const editJobPost = async(req,res)=>{
 }
 
 // Archive job
-
 const archiveJobs = async(req,res)=>{
     try{
         const {jobId} = req.params;

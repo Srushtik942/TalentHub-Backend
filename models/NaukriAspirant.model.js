@@ -45,11 +45,14 @@ const userSchema = new mongoose.Schema({
      companyName:{
         type: String,
         // required: true,
-        unique: true
+        unique: true,
+         sparse: true
+
     },
     website:{
         type:String,
-        unique: true
+        unique: true,
+         sparse: true
     },
     about:{
         type: String
