@@ -61,6 +61,11 @@ const jobSchema = new mongoose.Schema({
     type: Boolean,
     default: false
 },
+postedBy:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"NaukriAspirant",
+    required: true
+},
 
 },
 {

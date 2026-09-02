@@ -1,8 +1,8 @@
 const Job = require("../models/Job.model");
 const User = require("../models/NaukriAspirant.model");
+const Application = require("../models/application.model");
 
 // get all jobs
-
 const getAllJobs = async(req,res)=>{
     try{
         const jobsData = await Job.find({isArchived: false});
@@ -19,7 +19,6 @@ const getAllJobs = async(req,res)=>{
 }
 
 // search by name
-
 const searchJobs = async(req,res)=>{
     try{
         const {title, location, requiredSkills} = req.query;
@@ -57,7 +56,6 @@ const searchJobs = async(req,res)=>{
 }
 
 //  Bookmark application
-
 const toggleBookMark = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -90,5 +88,36 @@ const toggleBookMark = async (req, res) => {
     }
 };
 
+// Apply for the job
+const ApplyToJob = async(req,res)=>{
+    try{
+        const applicantId  = req.user._id;
+        const {jobId} = req.params;
+        const {coverLetter} = req.body;
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark}
+        if(!jobId || Job.isArchived){
+           return res.status(400).json({message: "Job ID is required"});
+        }
+
+
+        const application = await Application.create({
+            applicant : applicantId,
+            job: jobId,
+            coverLetter
+        });
+
+        await application.save();
+
+        res.status(201).json({ message: "Applied successfully", application });
+
+
+    }catch(err){
+         if (err.code === 11000) {
+            return res.status(409).json({ message: "You have already applied to this job" });
+        }
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+};
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob};

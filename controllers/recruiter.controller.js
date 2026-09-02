@@ -20,10 +20,10 @@ const postJob = async(req,res)=>{
             jobDescription,
             requiredSkills,
             workMode,
-            applicationDeadline
+            applicationDeadline,
+            postedBy: req.user._id
         });
 
-        await newJob.save();
 
         res.status(201).json({message: "Job posted successfully", job: newJob});
 
@@ -85,5 +85,44 @@ const archiveJobs = async(req,res)=>{
     }
 }
 
+// fetch application
 
-module.exports = {postJob, editJobPost, archiveJobs};
+const getApplicationForJob = async(req,res)=>{
+    try{
+        const recruiterId = req.user._id;
+
+        if(req.user.role !== "recruiter"){
+
+        return res.status(403).json({ message: "Only recruiters can view applications" });
+        }
+        const recruiterJobs = await Job.find({ postedBy: recruiterId }).select("_id");
+        const jobIds = recruiterJobs.map(job => job._id);
+
+ if (jobIds.length === 0) {
+            return res.status(404).json({ message: "You haven't posted any jobs yet" });
+        }
+
+          // 2. Get all applications where job is one of those job IDs
+        const applications = await Application.find({ job: { $in: jobIds } })
+            .populate("applicant", "fullName email experience location skills resume")
+            .populate("job", "title companyName location")
+            .sort({ createdAt: -1 });
+
+        if (applications.length === 0) {
+            return res.status(404).json({ message: "No applications found for your jobs yet" });
+        }
+
+        res.status(200).json({
+            message: "Applications fetched successfully",
+            count: applications.length,
+            applications
+        });
+
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
+
+module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob};
