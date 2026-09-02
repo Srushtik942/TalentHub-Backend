@@ -1,4 +1,5 @@
-const Job = require("../models/Job.model")
+const Job = require("../models/Job.model");
+const User = require("../models/NaukriAspirant.model");
 
 // get all jobs
 
@@ -17,4 +18,77 @@ const getAllJobs = async(req,res)=>{
     }
 }
 
-module.exports = {getAllJobs}
+// search by name
+
+const searchJobs = async(req,res)=>{
+    try{
+        const {title, location, requiredSkills} = req.query;
+
+        const filter = {isArchived : false};
+
+        if(title){
+            filter.title = { $regex: title, $options: 'i' };
+        }
+
+        if(location){
+            filter.location = { $regex: location, $options: 'i' };
+        }
+
+        if(requiredSkills){
+             const skillsArray = requiredSkills
+                .split(",")
+                .map(skill => skill.trim())
+                .filter(Boolean)
+                .map(skill => new RegExp(skill, "i"));
+
+                filter.$or = skillsArray.map(regex => ({ requiredSkills: regex }));
+        }
+
+        const jobData = await Job.find(filter);
+        if(jobData.length === 0){
+            return res.status(404).json({message:`Filter with ${JSON.stringify(filter)} jobs are not present`})
+        }
+        console.log("jobData", jobData);
+        res.status(200).json({message: "Jobs fetched successfully", jobs: jobData});
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
+//  Bookmark application
+
+const toggleBookMark = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { jobId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isBookmarked = user.bookmarks.some(id => id && id.toString() === jobId);
+
+        if (isBookmarked) {
+            user.bookmarks.pull(jobId);
+        } else {
+            user.bookmarks.push(jobId);
+        }
+
+        user.bookmarks = user.bookmarks.filter(id => id != null);
+
+        await user.save();
+
+        res.status(200).json({
+            message: isBookmarked ? "Job removed from bookmarks" : "Job bookmarked successfully",
+            bookmarks: user.bookmarks
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: "Internal Server Error", err: err.message });
+    }
+};
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark}
