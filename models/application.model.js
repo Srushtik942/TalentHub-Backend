@@ -17,13 +17,16 @@ const applicationSchema = new mongoose.Schema({
     },
     status:{
         type: String,
-        enum: ["pending", "shortlisted", "interview", "rejected", "hired"],
+        enum: ["pending", "shortlisted", "interview", "rejected", "hired","withdrawn"],
         default: "pending"
     },
       appliedAt: {
         type: Date,
         default: Date.now
     },
+    withdrawnAt: {
+    type: Date
+},
 },
 {
     timestamps: true

@@ -98,8 +98,6 @@ const ApplyToJob = async(req,res)=>{
         if(!jobId || Job.isArchived){
            return res.status(400).json({message: "Job ID is required"});
         }
-
-
         const application = await Application.create({
             applicant : applicantId,
             job: jobId,
@@ -119,5 +117,39 @@ const ApplyToJob = async(req,res)=>{
     }
 };
 
+// withdraw application
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob};
+const withdrawnApplication = async(req,res)=>{
+    try{
+        const application = await Application.findById(req.params.applicationId);
+
+        if(!application){
+            return res.status(404).json({message: "Application not found"});
+        }
+
+        if(application.applicant.toString()!== req.user._id.toString()){
+            return res.status(403).json({message: "You are not authorized to withdraw this application"});
+        }
+
+        if(application.status === "withdrawn"){
+            return res.status(400).json({message: "Application is already withdrawn"});
+        }
+
+        if (["rejected", "hired"].includes(application.status)) {
+         return res.status(409).json({ message: "Cannot withdraw an application that's already been decided" });
+        }
+
+        application.status = "withdrawn";
+        application.withdrawnAt = new Date();
+        await application.save();
+
+        res.status(200).json({message: "Application withdrawn successfully", application});
+
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication};

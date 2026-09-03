@@ -1,4 +1,5 @@
 const Job = require('../models/Job.model');
+const Application = require('../models/application.model')
 
 // create new job
 const postJob = async(req,res)=>{
