@@ -87,7 +87,6 @@ const archiveJobs = async(req,res)=>{
 }
 
 // fetch application
-
 const getApplicationForJob = async(req,res)=>{
     try{
         const recruiterId = req.user._id;
@@ -125,5 +124,40 @@ const getApplicationForJob = async(req,res)=>{
     }
 }
 
+// Shortlist application
+const shortlistApplication = async(req,res)=>{
+    try{
+        const {applicationId} = req.params;
+        console.log("Passing applicationId")
 
-module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob};
+        const application = await Application.findById(applicationId).populate("job");
+        console.log("Finding application by id",application)
+
+
+        if (application.job.postedBy.toString() !== req.user._id.toString()) {
+             return res.status(403).json({ message: "Not authorized to update this application" });
+         }
+
+
+if (application.status === "withdrawn") {
+  return res.status(409).json({ message: "Cannot update a withdrawn application" });
+}
+
+const allowedStatuses = ["shortlisted", "interview", "rejected", "hired"];
+
+if (!allowedStatuses.includes(req.body.status)) {
+  return res.status(400).json({ message: "Invalid status value" });
+}
+
+application.status = req.body.status;
+await application.save();
+
+res.status(200).json({message:" Application status updated successfully", application});
+
+    }catch(err){
+      res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
+
+module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication};
