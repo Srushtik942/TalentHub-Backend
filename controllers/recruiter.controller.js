@@ -1,5 +1,6 @@
 const Job = require('../models/Job.model');
-const Application = require('../models/application.model')
+const Application = require('../models/application.model');
+const User = require('../models/NaukriAspirant.model');
 
 // create new job
 const postJob = async(req,res)=>{
@@ -160,4 +161,18 @@ res.status(200).json({message:" Application status updated successfully", applic
 }
 
 
-module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication};
+// fetch users data
+const fetchRecruiterData = async(req,res)=>{
+    try{
+        const userId = req.user._id;
+
+        const userData = await User.findById(userId).select("-password -refreshToken").populate("fullName email role experience location skills resume");
+        res.status(200).json({message:"Profile fetched successfully",userData})
+
+    }catch(error){
+        res.status(500).json({message:"Internal Server Error",error:error.message});
+    }
+}
+
+
+module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData};

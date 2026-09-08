@@ -4,7 +4,7 @@ const verifyToken = require('../helperFunctions/verifyToken');
 const authorize = require('../helperFunctions/authorize');
 const {postJob} = require('../controllers/recruiter.controller');
 const {editJobPost} = require('../controllers/recruiter.controller');
-const {archiveJobs,getApplicationForJob,shortlistApplication} = require('../controllers/recruiter.controller');
+const {archiveJobs,getApplicationForJob,shortlistApplication,fetchRecruiterData} = require('../controllers/recruiter.controller');
 
 
 router.use(verifyToken, authorize(('recruiter')));
@@ -14,4 +14,5 @@ router.put('/jobs/:jobId',editJobPost);
 router.patch('/jobs/:jobId/archive',archiveJobs);
 router.get("/applications", getApplicationForJob);
 router.put("/applications/status/:applicationId", shortlistApplication);
+router.get("/profile",verifyToken, fetchRecruiterData)
 module.exports = router;
