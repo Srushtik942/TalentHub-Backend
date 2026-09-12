@@ -161,4 +161,28 @@ const fetchProfileData = async(req,res)=>{
     }
 }
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData};
+
+const editProfile = async(req,res)=>{
+    try{
+        const userId = req.user._id;
+
+        const {fullName, email, experience, location, skills, resume} = req.body;
+
+        const userData = await User.findByIdAndUpdate(userId,{
+            fullName,
+            email,
+            experience,
+            location,
+            skills,
+            resume
+        });
+
+        res.status(200).json({message: "Profile updated successfully", userData});
+
+    }catch(err){
+        res.status(500).json({message:"Internal Server Error",err:err.message});
+    }
+}
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile};

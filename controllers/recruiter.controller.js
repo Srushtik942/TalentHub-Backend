@@ -34,6 +34,26 @@ const postJob = async(req,res)=>{
     }
 }
 
+// delete job
+
+const deleteJobPost = async(req,res)=>{
+    try{
+        const {jobId} = req.params;
+
+        const job = await Job.findById(jobId);
+
+        if(!job){
+            return res.status(404).json({message:"JobPost is not showing"})
+        }
+
+        const deletedJob = await Job.findByIdAndDelete(jobId);
+
+        res.status(200).json({message: "Job deleted successfully", job: deletedJob});
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
 // Edit job
 const editJobPost = async(req,res)=>{
     try{
@@ -174,6 +194,7 @@ const fetchRecruiterData = async(req,res)=>{
     }
 }
 
+// edit profile
 const editRecruiterProfile = async(req,res)=>{
     try{
         const userId = req.user._id;
@@ -203,4 +224,4 @@ const editRecruiterProfile = async(req,res)=>{
 }
 
 
-module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData,editRecruiterProfile};
+module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData,editRecruiterProfile,deleteJobPost};
