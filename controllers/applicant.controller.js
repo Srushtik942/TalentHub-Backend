@@ -56,6 +56,64 @@ const searchJobs = async(req,res)=>{
     }
 }
 
+// Filter the salary , experience, employment type
+const filterByOptions = async(req,res)=>{
+    try{
+        const {minSalary, maxSalary, experience, employmentType} = req.query;
+
+        const filter = {isArchived: false};
+ if (minSalary) {
+      const minNum = Number(minSalary);
+      if (isNaN(minNum)) {
+        return res.status(400).json({ message: "minSalary must be a number" });
+      }
+      filter.salaryMax = { $gte: minNum };
+    }
+
+    if (maxSalary) {
+      const maxNum = Number(maxSalary);
+      if (isNaN(maxNum)) {
+        return res.status(400).json({ message: "maxSalary must be a number" });
+      }
+      filter.salaryMin = { $lte: maxNum };
+    }
+
+    if (minSalary && maxSalary && Number(minSalary) > Number(maxSalary)) {
+      return res.status(400).json({ message: "minSalary cannot be greater than maxSalary" });
+    }
+
+        if(experience){
+            const expNum = Number(experience);
+            if(isNaN(expNum)){
+                return res.status(400).json({message:"experience must be a number"});
+            }
+            filter.experience = {$lte:expNum};
+        }
+
+        if(employmentType){
+            const allowedModes = ["remote","on-site","hybrid"];
+
+            if(!allowedModes.includes(employmentType)){
+                return res.status(400).json({
+                message: `employmentType must be one of: ${allowedModes.join(", ")}`,
+                });
+            }
+            filter.workMode = employmentType;
+        }
+
+        const jobData = await Job.find(filter).populate("postedBy", "companyName location");
+
+
+        return res.status(200).json({ count: jobData.length, jobs: jobData });
+
+
+
+    }catch(err){
+        return res.status(500).json({message:"Internal Server Error",err:err.message});
+    }
+}
+
+
 //  Bookmark application
 const toggleBookMark = async (req, res) => {
     try {
@@ -119,7 +177,6 @@ const ApplyToJob = async(req,res)=>{
 };
 
 // withdraw application
-
 const withdrawnApplication = async(req,res)=>{
     try{
         const application = await Application.findById(req.params.applicationId);
@@ -208,4 +265,4 @@ const generateInterviewPrep = async (req,res)=>{
 }
 
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep  };
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions};

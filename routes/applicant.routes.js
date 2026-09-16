@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../helperFunctions/verifyToken');
-const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep } = require('../controllers/applicant.controller');
+const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep,filterByOptions } = require('../controllers/applicant.controller');
 const {requireAuth} = require('../auth/auth');
 const authorize = require('../helperFunctions/authorize');
 
@@ -16,6 +16,7 @@ router.patch('/applications/:applicationId/withdraw',withdrawnApplication);
 router.get("/profile", verifyToken, fetchProfileData);
 router.put("/editProfile/:userId",editProfile);
 router.get("/ai-interview-prep/:jobId",generateInterviewPrep);
+router.get('/jobs/filter',filterByOptions);
 
 
 module.exports = router;
