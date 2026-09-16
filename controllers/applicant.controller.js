@@ -1,6 +1,7 @@
 const Job = require("../models/Job.model");
 const User = require("../models/NaukriAspirant.model");
 const Application = require("../models/application.model");
+const getInterviewPrep = require("../helperFunctions/getInterviewPrep");
 
 // get all jobs
 const getAllJobs = async(req,res)=>{
@@ -185,5 +186,26 @@ const editProfile = async(req,res)=>{
     }
 }
 
+// AI Helper function for prep
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile};
+const generateInterviewPrep = async (req,res)=>{
+    try{
+        const {jobId} = req.params;
+        const job = await Job.findById(jobId);
+
+        if(!job){
+            return res.status(404).json({error:"JobPost not found"});
+        }
+
+        const result = await getInterviewPrep(job.jobDescription, job.requiredSkills);
+        console.log("result",result);
+
+        return res.status(200).json({message:"QUestions generated successfully!",result});
+
+    }catch(err){
+        res.status(500).json({message:"Internal Server Error",err:err.message});
+    }
+}
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep  };
