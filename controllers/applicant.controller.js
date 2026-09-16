@@ -151,6 +151,7 @@ const withdrawnApplication = async(req,res)=>{
     }
 }
 
+// fetch profile data
 const fetchProfileData = async(req,res)=>{
     try{
         const userId = req.user._id;
@@ -161,7 +162,7 @@ const fetchProfileData = async(req,res)=>{
     }
 }
 
-
+// edit profile data
 const editProfile = async(req,res)=>{
     try{
         const userId = req.user._id;

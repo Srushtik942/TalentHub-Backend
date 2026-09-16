@@ -223,5 +223,4 @@ const editRecruiterProfile = async(req,res)=>{
     }
 }
 
-
 module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData,editRecruiterProfile,deleteJobPost};
