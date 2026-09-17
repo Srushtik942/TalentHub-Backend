@@ -39,7 +39,7 @@ Create a `.env` file in the root directory:
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/jobboard
-JWT_SECRET=your_jwt_secret_here   # TODO: confirm if auth uses JWT
+JWT_SECRET=your_jwt_secret_here  
 NODE_ENV=development
 ```
 
