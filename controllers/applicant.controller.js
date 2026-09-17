@@ -113,6 +113,23 @@ const filterByOptions = async(req,res)=>{
     }
 }
 
+// sort by salary
+
+const sortBySalary = async(req,res)=>{
+    try{
+        const {order, field} = req.query;
+
+        const sortOrder = order === "desc" ? -1 : 1;
+        const sortField = field === "salaryMax" ? "salaryMax" : "salaryMin";
+
+        const jobs = await Job.find({salaryMin: {$exists: true}}).sort({[sortField]: sortOrder});
+
+       return res.status(200).json({message:"Jobs fetched successfully!",jobs});
+
+    }catch(err){
+        res.status(500).json({message:"Internal Server Error",err:err.message});
+    }
+}
 
 //  Bookmark application
 const toggleBookMark = async (req, res) => {
@@ -265,4 +282,6 @@ const generateInterviewPrep = async (req,res)=>{
 }
 
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions};
+
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary};
