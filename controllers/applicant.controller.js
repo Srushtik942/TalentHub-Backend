@@ -20,6 +20,43 @@ const getAllJobs = async(req,res)=>{
 }
 
 // search by name
+// const searchJobs = async(req,res)=>{
+//     try{
+//         const {title, location, requiredSkills} = req.query;
+
+//         const filter = {isArchived : false};
+
+//         if(title){
+//             filter.title = { $regex: title, $options: 'i' };
+//         }
+
+//         if(location){
+//             filter.location = { $regex: location, $options: 'i' };
+//         }
+
+//         if(requiredSkills){
+//              const skillsArray = requiredSkills
+//                 .split(",")
+//                 .map(skill => skill.trim())
+//                 .filter(Boolean)
+//                 .map(skill => new RegExp(skill, "i"));
+
+//                 filter.$or = skillsArray.map(regex => ({ requiredSkills: regex }));
+//         }
+
+//         const jobData = await Job.find(filter);
+//         if(jobData.length === 0){
+//             return res.status(404).json({message:`Filter with ${JSON.stringify(filter)} jobs are not present`})
+//         }
+//         console.log("jobData", jobData);
+//         res.status(200).json({message: "Jobs fetched successfully", jobs: jobData});
+
+//     }catch(err){
+//         res.status(500).json({message: "Internal Server Error",err: err.message});
+//     }
+// }
+
+// search by name
 const searchJobs = async(req,res)=>{
     try{
         const {title, location, requiredSkills} = req.query;
@@ -40,8 +77,11 @@ const searchJobs = async(req,res)=>{
                 .map(skill => skill.trim())
                 .filter(Boolean)
                 .map(skill => new RegExp(skill, "i"));
-
-                filter.$or = skillsArray.map(regex => ({ requiredSkills: regex }));
+                
+                filter.$or = skillsArray.flatMap(regex => [
+                    { requiredSkills: regex },
+                    { tags: regex },
+                ]);
         }
 
         const jobData = await Job.find(filter);
@@ -55,6 +95,7 @@ const searchJobs = async(req,res)=>{
         res.status(500).json({message: "Internal Server Error",err: err.message});
     }
 }
+
 
 // Filter the salary , experience, employment type
 const filterByOptions = async(req,res)=>{
@@ -280,6 +321,10 @@ const generateInterviewPrep = async (req,res)=>{
         res.status(500).json({message:"Internal Server Error",err:err.message});
     }
 }
+
+// Fetch all jobs
+
+
 
 
 

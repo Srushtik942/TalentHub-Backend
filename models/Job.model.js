@@ -47,6 +47,10 @@ const jobSchema = new mongoose.Schema({
         trim: true,
         length: [3, 100]
     },
+    tags:{
+     type: [String],
+     default: [],
+    },
     applicationDeadline:{
         type: Date,
         required: true,
@@ -64,8 +68,27 @@ const jobSchema = new mongoose.Schema({
 postedBy:{
     type: mongoose.Schema.Types.ObjectId,
     ref:"NaukriAspirant",
-    required: true
+    required: function () { return !this.isExternal; },
 },
+ isExternal: {
+    type: Boolean,
+    default: false,
+  },
+  source: {
+    type: String, // 'arbeitnow' | 'remotive' | 'greenhouse' | 'lever'
+    default: null,
+  },
+  sourceUrl: {
+    type: String, // link to apply on the original site
+    default: null,
+  },
+  externalId: {
+    type: String, // stable id from jobFetcher.js, e.g. 'greenhouse:stripe:12345'
+    default: null,
+    index: true,
+    sparse: true, // allows many docs with externalId: null without unique conflicts
+    unique: true,
+  },
 
 },
 {
