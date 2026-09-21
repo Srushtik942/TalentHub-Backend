@@ -6,7 +6,7 @@
  * (like a GitHub Action, Render cron job, or node-cron in Server.js).
  */
 
-const {importExternalJobs} = require('../helperFunctions/Importexternaljobs');
+const {importExternalJobs} = require('../helperFunctions/importExternalJobs');
 
 async function refreshExternalJobs(req, res) {
   try {
