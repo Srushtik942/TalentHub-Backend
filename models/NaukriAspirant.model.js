@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     },
     // Applicant fields
     experience:{
-        type:Number,
+        type: String
         // required: true
     },
     location:{
