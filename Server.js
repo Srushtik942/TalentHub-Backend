@@ -36,6 +36,4 @@ async function startServer(){
     }
 }
 
-app.listen(process.env.PORT, async () => {
-    await startServer();
-})
+startServer();
