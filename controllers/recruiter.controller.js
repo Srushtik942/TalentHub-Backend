@@ -6,9 +6,9 @@ const User = require('../models/NaukriAspirant.model');
 const postJob = async(req,res)=>{
     try{
 
-        const {title, companyName, salaryMin,salaryMax, experience, location, jobDescription, requiredSkills,workMode,applicationDeadline} = req.body;
+        const {title, companyName, salaryMin,salaryMax, experience, location, jobDescription, requiredSkills,workMode,applicationDeadline, employmentType} = req.body;
 
-        if(!title || !companyName || !salaryMin || !salaryMax || !experience || !location || !jobDescription || !requiredSkills || !workMode || !applicationDeadline){
+        if(!title || !companyName || !salaryMin || !salaryMax || !experience || !location || !jobDescription || !requiredSkills || !workMode || !applicationDeadline || !employmentType){
             return res.status(400).json({message: "All fields are required"});
         }
 
@@ -20,6 +20,7 @@ const postJob = async(req,res)=>{
             experience,
             location,
             jobDescription,
+            employmentType,
             requiredSkills,
             workMode,
             applicationDeadline,
