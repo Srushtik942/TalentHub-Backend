@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../helperFunctions/verifyToken');
-const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep,filterByOptions,sortBySalary } = require('../controllers/applicant.controller');
+const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById } = require('../controllers/applicant.controller');
 const {requireAuth} = require('../auth/auth');
 const authorize = require('../helperFunctions/authorize');
 
@@ -9,6 +9,7 @@ const authorize = require('../helperFunctions/authorize');
 router.use(verifyToken, authorize(('applicant')));
 
 router.get('/jobs',getAllJobs);
+router.get('/jobs/:jobId',getJobById);
 router.get('/jobs/search',searchJobs);
 router.patch('/jobs/:jobId/bookmark',toggleBookMark);
 router.post('/jobs/:jobId/apply',ApplyToJob);

@@ -19,6 +19,28 @@ const getAllJobs = async(req,res)=>{
     }
 }
 
+
+// get job by id
+
+const getJobById = async(req,res)=>{
+    try{
+        const jobId = req.params.jobId;
+        if(!jobId){
+            return res.status(400).json({message: "Job ID is required"});
+        }
+        const jobData = await Job.findById(jobId);
+        console.log("jobData", jobData);
+        if(!jobData){
+            return res.status(404).json({message: "Job not found"});
+        }
+        res.status(200).json({message: "Job fetched successfully", job: jobData});
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
+
 // search by name
 // const searchJobs = async(req,res)=>{
 //     try{
@@ -77,7 +99,7 @@ const searchJobs = async(req,res)=>{
                 .map(skill => skill.trim())
                 .filter(Boolean)
                 .map(skill => new RegExp(skill, "i"));
-                
+
                 filter.$or = skillsArray.flatMap(regex => [
                     { requiredSkills: regex },
                     { tags: regex },
@@ -329,4 +351,4 @@ const generateInterviewPrep = async (req,res)=>{
 
 
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary};
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById};
