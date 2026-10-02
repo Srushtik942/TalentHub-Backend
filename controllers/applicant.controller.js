@@ -29,7 +29,7 @@ const getJobById = async(req,res)=>{
             return res.status(400).json({message: "Job ID is required"});
         }
         const jobData = await Job.findById(jobId)
-        .populate('postedBy', 'fullName email title companyName location')
+        .populate('postedBy', 'fullName email title companyName location website')
         .lean();
         console.log("jobData", jobData);
 
