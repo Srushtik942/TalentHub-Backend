@@ -84,9 +84,13 @@ const getJobById = async(req,res)=>{
 // search by name
 const searchJobs = async(req,res)=>{
     try{
-        const {title, location, requiredSkills} = req.query;
+        const {title, location, requiredSkills, excludeId} = req.query;
 
         const filter = {isArchived : false};
+
+        if(excludeId){
+            filter._id = {$ne: excludeId};
+        }
 
         if(title){
             filter.title = { $regex: title, $options: 'i' };
