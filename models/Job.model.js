@@ -52,11 +52,6 @@ const jobSchema = new mongoose.Schema({
         trim: true,
         length: [3, 100]
     },
-    employmentType:{
-     type:String,
-     enum:["full-time", "part-time", "contract", "internship"],
-     required:true,
-    },
     tags:{
      type: [String],
      default: [],
@@ -94,11 +89,12 @@ postedBy:{
   },
   externalId: {
     type: String, // stable id from jobFetcher.js, e.g. 'greenhouse:stripe:12345'
-    default: null,
-    index: true,
-    sparse: true, // allows many docs with externalId: null without unique conflicts
-    unique: true,
+    // default: null,
+    // index: true,
+    // sparse: true, // allows many docs with externalId: null without unique conflicts
+    // unique: true,
   },
+  
 
 },
 {
