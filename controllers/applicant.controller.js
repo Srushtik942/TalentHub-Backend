@@ -276,16 +276,24 @@ const editProfile = async(req,res)=>{
 
         const {fullName, email, experience, location, skills, resume} = req.body;
 
-        const userData = await User.findByIdAndUpdate(userId,{
-            fullName,
-            email,
-            experience,
-            location,
-            skills,
-            resume
-        });
+        const user = await User.findById(userId);
 
-        res.status(200).json({message: "Profile updated successfully", userData});
+         if(!user){
+            return res.status(404).json({message: "User not found"});
+         }
+
+        const updatedSKills = [...new Set([...user.skills,...skills])];
+
+        user.fullName = fullName || user.fullName;
+        user.email = email || user.email;
+        user.experience = experience || user.experience;
+        user.location = location || user.location;
+        user.skills = updatedSKills || user.skills;
+        user.resume = resume || user.resume;
+
+        await user.save();
+
+        res.status(200).json({message: "Profile updated successfully", userData:user});
 
     }catch(err){
         res.status(500).json({message:"Internal Server Error",err:err.message});
