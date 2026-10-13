@@ -197,32 +197,60 @@ const toggleBookMark = async (req, res) => {
 };
 
 // Apply for the job
-const ApplyToJob = async(req,res)=>{
-    try{
-        const applicantId  = req.user._id;
-        const {jobId} = req.params;
-        const {coverLetter} = req.body || {};
+const ApplyToJob = async (req, res) => {
+  try {
+    const applicantId = req.user._id;
+    const { jobId } = req.params;
+    const { coverLetter } = req.body || {};
 
-        if(!jobId || Job.isArchived){
-           return res.status(400).json({message: "Job ID is required"});
-        }
-        const application = await Application.create({
-            applicant : applicantId,
-            job: jobId,
-            coverLetter
-        });
-
-        await application.save();
-
-        res.status(201).json({ message: "Applied successfully", application });
-
-
-    }catch(err){
-         if (err.code === 11000) {
-            return res.status(409).json({ message: "You have already applied to this job" });
-        }
-        res.status(500).json({message: "Internal Server Error",err: err.message});
+    if (!jobId) {
+      return res.status(400).json({ message: "Job ID is required" });
     }
+
+    const job = await Job.findById(jobId).select("_id isArchived");
+    if (!job) {
+      return res.status(404).json({ message: "Job not found!" });
+    }
+    if (job.isArchived) {
+      return res.status(410).json({ message: "This job is no longer accepting applications" });
+    }
+
+    const existing = await Application.findOne({ applicant: applicantId, job: jobId });
+
+    if (existing) {
+      // Already has an active application: don't touch it, just report it
+      if (existing.status !== "withdrawn") {
+        return res.status(409).json({
+          message: "You have already applied to this job",
+          application: existing,
+        });
+      }
+
+      // Withdrawn earlier: reactivate it
+      existing.status = "applied"; // use your schema's default status value
+      if (coverLetter) existing.coverLetter = coverLetter;
+      await existing.save();
+      return res.status(200).json({ message: "Applied successfully", application: existing });
+    }
+
+    const application = await Application.create({
+      applicant: applicantId,
+      job: jobId,
+      coverLetter,
+    });
+
+    return res.status(201).json({ message: "Applied successfully", application });
+  } catch (err) {
+    console.error("Error applying for job:", err);
+    if (err.code === 11000) {
+      const application = await Application.findOne({
+        applicant: req.user._id,
+        job: req.params.jobId,
+      });
+      return res.status(409).json({ message: "You have already applied to this job", application });
+    }
+    return res.status(500).json({ message: "Internal Server Error", err: err.message });
+  }
 };
 
 // withdraw application
