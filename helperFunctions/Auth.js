@@ -7,7 +7,7 @@ const router = expres.Router();
 // Register for user/student
 router.post('/register',async(req,res)=>{
     try{
-        const {fullName,email,password,role,experience,location,skills,resume,companyName,website,about} = req.body;
+        const {fullName,email,password,role,experience,location,skills,resume,companyName,website,about,companySize} = req.body;
         const existingUser = await NaukriAspirant.findOne({email});
         if(existingUser){
             return res.status(400).json({message:"User already exists"});
@@ -24,7 +24,8 @@ router.post('/register',async(req,res)=>{
             resume,
             companyName,
             website,
-            about
+            about,
+            companySize
         });
         console.log("user data is coming", user);
 

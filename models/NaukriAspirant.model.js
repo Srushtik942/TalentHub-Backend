@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema({
     },
     about:{
         type: String
+    },
+    companySize:{
+        type: String,
+        required: true,
+         enum: ["11-50 employees", "51-200 employees", "201-500 employees", "501-1000 employees", "1000+ employees"],
     }
 },
 {

@@ -6,9 +6,9 @@ const User = require('../models/NaukriAspirant.model');
 const postJob = async(req,res)=>{
     try{
 
-        const {title, companyName, salaryMin,salaryMax, experience, location, jobDescription, requiredSkills,workMode,applicationDeadline, employmentType} = req.body;
+        const {title, companyName, salaryMin,salaryMax, experience, location, jobDescription, requiredSkills,workMode,applicationDeadline, employmentType, companySize} = req.body;
 
-        if(!title || !companyName || !salaryMin || !salaryMax || !experience || !location || !jobDescription || !requiredSkills || !workMode || !applicationDeadline || !employmentType){
+        if(!title || !companyName || !salaryMin || !salaryMax || !experience || !location || !jobDescription || !requiredSkills || !workMode || !applicationDeadline || !employmentType || !companySize){
             return res.status(400).json({message: "All fields are required"});
         }
 
@@ -24,6 +24,7 @@ const postJob = async(req,res)=>{
             requiredSkills,
             workMode,
             applicationDeadline,
+            companySize,
             postedBy: req.user._id
         });
 
@@ -187,7 +188,8 @@ const fetchRecruiterData = async(req,res)=>{
     try{
         const userId = req.user._id;
 
-        const userData = await User.findById(userId).select("-password -refreshToken").populate("fullName email role experience location");
+        const userData = await User.findById(userId).select("-password -refreshToken").populate("fullName email role experience location companyName companySize");
+        console.log("userData",userData);
         res.status(200).json({message:"Profile fetched successfully",userData})
 
     }catch(error){
