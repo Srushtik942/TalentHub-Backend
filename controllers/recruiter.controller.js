@@ -57,39 +57,61 @@ const deleteJobPost = async(req,res)=>{
     }
 }
 // Edit job
-const editJobPost = async(req,res)=>{
-    try{
-        const {jobId} = req.params;
-        const {title, companyName, salaryMin, salaryMax, experience, location, jobDescription, requiredSkills, workMode, applicationDeadline} = req.body;
+const editJobPost = async (req, res) => {
+    try {
+        const { jobId } = req.params;
 
-        const isExistjob = await Job.findById(jobId);
-
-        if(!isExistjob){
-            return res.status(404).json({message: "Job not found"});
+        if(!jobId){
+            return res.status(400).json({ message: "Job ID is required" });
         }
 
-       const newJobData = await Job.findByIdAndUpdate(jobId,{
-            title,
-            companyName,
-            salaryMin,
-            salaryMax,
-            experience,
-            location,
-            jobDescription,
-            requiredSkills,
-            workMode,
-            applicationDeadline
-        },{new: true});
+        const job = await Job.findById(jobId);
+        if (!job) {
+            return res.status(404).json({ message: "Job not found" });
+        }
 
-        await newJobData.save();
+        // External jobs shouldn't be edited
+        if (job.isExternal) {
+            return res.status(403).json({ message: "External jobs cannot be edited" });
+        }
+        const allowedFields = [
+            "title", "companyName", "salaryMin", "salaryMax",
+            "workMode", "employmentType", "experience", "location",
+            "jobDescription", "requiredSkills", "tags",
+            "applicationDeadline", "isArchived"
+        ];
 
-        res.status(200).json({message: "Job updated successfully", job: newJobData});
+        const updates = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) updates[field] = req.body[field];
+        }
 
-    }catch(err){
-        res.status(500).json({message: "Internal Server Error",err: err.message});
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ message: "No valid fields provided to update" });
+        }
+
+        // Cross-field check using new values, falling back to existing ones
+        const min = updates.salaryMin ?? job.salaryMin;
+        const max = updates.salaryMax ?? job.salaryMax;
+        if (min > max) {
+            return res.status(400).json({ message: "salaryMin cannot be greater than salaryMax" });
+        }
+
+        const updatedJob = await Job.findByIdAndUpdate(
+            jobId,
+            { $set: updates },
+            { new: true, runValidators: true }
+        );
+
+        res.status(200).json({ message: "Job updated successfully", job: updatedJob });
+
+    } catch (err) {
+        if (err.name === "ValidationError") {
+            return res.status(400).json({ message: "Validation failed", err: err.message });
+        }
+        res.status(500).json({ message: "Internal Server Error", err: err.message });
     }
-}
-
+};
 // Archive job
 const archiveJobs = async(req,res)=>{
     try{
