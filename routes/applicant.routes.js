@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../helperFunctions/verifyToken');
-const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById } = require('../controllers/applicant.controller');
+const {getAllJobs,searchJobs,toggleBookMark,ApplyToJob,withdrawnApplication,fetchProfileData,editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById,getResumeUploadUrl,confirmResumeUpload, getResumeDownloadUrl } = require('../controllers/applicant.controller');
 const {requireAuth} = require('../auth/auth');
 const authorize = require('../helperFunctions/authorize');
 
@@ -19,7 +19,9 @@ router.get("/ai-interview-prep/:jobId",generateInterviewPrep);
 router.get('/jobs/filter',filterByOptions);
 router.get('/jobs/sort',sortBySalary)
 router.get('/jobs/:jobId',getJobById);
-
+router.post("/resume/upload-url",getResumeUploadUrl);
+router.post("/resume/confirm",confirmResumeUpload);
+router.get("/resume/download-url",getResumeDownloadUrl);
 
 
 module.exports = router;

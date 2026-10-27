@@ -2,6 +2,29 @@ const Job = require("../models/Job.model");
 const User = require("../models/NaukriAspirant.model");
 const Application = require("../models/application.model");
 const getInterviewPrep = require("../helperFunctions/getInterviewPrep");
+const { S3Client, GetObjectCommand, HeadObjectCommand } = require("@aws-sdk/client-s3");
+const { createPresignedPost } = require("@aws-sdk/s3-presigned-post");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+
+const s3 = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    }
+});
+
+const BUCKET = process.env.S3_BUCKET;
+const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED = {
+    "application/pdf": "pdf",
+    "application/msword": "doc",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+};
+
+
+
 
 // get all jobs
 const getAllJobs = async(req,res)=>{
@@ -349,11 +372,78 @@ const generateInterviewPrep = async (req,res)=>{
     }
 }
 
-// Fetch all jobs
+
+// upload resume
+
+// upload resume: step 1, get a presigned upload form
+const getResumeUploadUrl = async (req, res) => {
+    try {
+        const { contentType } = req.body || {};
+        const ext = ALLOWED[contentType];
+        if (!ext) {
+            return res.status(400).json({ message: "Only PDF, DOC or DOCX allowed" });
+        }
+
+        const key = `resumes/${req.user._id}/${Date.now()}.${ext}`;
+        const { url, fields } = await createPresignedPost(s3, {
+            Bucket: BUCKET,
+            Key: key,
+            Conditions: [
+                ["content-length-range", 1, MAX_SIZE],
+                ["eq", "$Content-Type", contentType],
+            ],
+            Fields: { "Content-Type": contentType },
+            Expires: 300,
+        });
+
+        return res.status(200).json({ url, fields, key });
+    } catch (err) {
+        console.error("Upload URL error:", err);
+        return res.status(500).json({ message: "Could not create upload URL", err: err.message });
+    }
+};
+
+// upload resume:  save the key after the browser uploaded the file
+const confirmResumeUpload = async (req, res) => {
+    try {
+        const { key } = req.body || {};
+        if (!key || !key.startsWith(`resumes/${req.user._id}/`)) {
+            return res.status(400).json({ message: "Invalid key" });
+        }
+
+        await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
+        await User.findByIdAndUpdate(req.user._id, { resume: key });
+
+        return res.status(200).json({ message: "Resume saved", key });
+    } catch (err) {
+        console.error("Confirm resume error:", err);
+        return res.status(400).json({ message: "File not found in storage, upload again" });
+    }
+};
+
+const getResumeDownloadUrl = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select("resume");
+        if (!user?.resume) {
+            return res.status(404).json({ message: "No resume uploaded" });
+        }
+
+        const url = await getSignedUrl(
+            s3,
+            new GetObjectCommand({ Bucket: BUCKET, Key: user.resume }),
+            { expiresIn: 300 }
+        );
+        return res.status(200).json({ url });
+    } catch (err) {
+        console.error("Download URL error:", err);
+        return res.status(500).json({ message: "Could not create download URL", err: err.message });
+    }
+};
 
 
 
 
 
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById};
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById,getResumeUploadUrl, confirmResumeUpload, getResumeDownloadUrl};
