@@ -131,6 +131,27 @@ const archiveJobs = async(req,res)=>{
     }
 }
 
+// fetch all jobPost
+
+const getAllJobPosts = async(req,res)=>{
+    try{
+        const recruiterId = req.params.recruiterId;
+        const jobPosts = await Job.find({postedBy: recruiterId});
+        console.log(jobPosts);
+
+        if(jobPosts.length === 0){
+            res.status(404).json({message: "No job posts found for this recruiter"});
+        }
+
+        res.status(200).json({message: "Job posts fetched successfully", count: jobPosts.length, jobPosts});
+
+
+
+    }catch(err){
+        res.status(500).json({message: "Internal Server Error",err: err.message});
+    }
+}
+
 // fetch application
 const getApplicationForJob = async(req,res)=>{
     try{
@@ -248,4 +269,4 @@ const editRecruiterProfile = async(req,res)=>{
     }
 }
 
-module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData,editRecruiterProfile,deleteJobPost};
+module.exports = {postJob, editJobPost, archiveJobs,getApplicationForJob, shortlistApplication,fetchRecruiterData,editRecruiterProfile,deleteJobPost,getAllJobPosts};
