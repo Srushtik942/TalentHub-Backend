@@ -325,22 +325,23 @@ const editProfile = async(req,res)=>{
     try{
         const userId = req.user._id;
 
-        const {fullName, email, experience, location, skills, resume} = req.body;
-
         const user = await User.findById(userId);
 
          if(!user){
             return res.status(404).json({message: "User not found"});
          }
 
-        const updatedSKills = [...new Set([...user.skills,...skills])];
+         const editableFields = ["fullName", "email", "experience", "location", "skills", "resume", "about"];
 
-        user.fullName = fullName || user.fullName;
-        user.email = email || user.email;
-        user.experience = experience || user.experience;
-        user.location = location || user.location;
-        user.skills = updatedSKills || user.skills;
-        user.resume = resume || user.resume;
+         for(const field of editableFields){
+            if(req.body[field] !== undefined){
+                user[field] = req.body[field];
+            }
+         }
+          // Skills
+        if (Array.isArray(req.body.skills)) {
+            user.skills = [...new Set([...(user.skills || []), ...req.body.skills])];
+        }
 
         await user.save();
 
