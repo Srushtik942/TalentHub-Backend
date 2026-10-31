@@ -442,9 +442,30 @@ const getResumeDownloadUrl = async (req, res) => {
 };
 
 
+const fetchStatus = async(req,res)=>{
+    try{
+        const applicantId = req.params.applicantId;
+
+        if(!applicantId){
+            res.status(400).json({message:"Applicant ID is required"});
+        }
+
+        const response = await Application.findOne({applicant:applicantId});
+
+        if(!response){
+            res.status(404).json({message:"Application not found"});
+        }
+        res.status(200).json({message:"Application found", data:response});
+
+
+    }catch(err){
+        res.status(500).json({message:"Internal Server Error",err:err.message})
+    }
+}
 
 
 
 
 
-module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById,getResumeUploadUrl, confirmResumeUpload, getResumeDownloadUrl};
+
+module.exports = {getAllJobs, searchJobs, toggleBookMark, ApplyToJob, withdrawnApplication, fetchProfileData, editProfile,generateInterviewPrep,filterByOptions,sortBySalary,getJobById,getResumeUploadUrl, confirmResumeUpload, getResumeDownloadUrl, fetchStatus};
