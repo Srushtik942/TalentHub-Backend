@@ -455,7 +455,8 @@ const fetchStatus = async(req,res)=>{
         if(!response){
             res.status(404).json({message:"Application not found"});
         }
-        res.status(200).json({message:"Application found", data:response});
+        res.status(200).json({message:"Application found", applications});
+
 
 
     }catch(err){
