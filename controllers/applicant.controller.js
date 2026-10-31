@@ -450,8 +450,9 @@ const fetchStatus = async(req,res)=>{
             res.status(400).json({message:"Applicant ID is required"});
         }
 
-        const applications = await Application.find({ applicant: applicantId });
-
+        const applications = await Application.find({ applicant: applicantId })
+        .populate("job","title companyName location status")
+        .sort({updatedAt: -1})
 
         if(!applications.length  === 0){
             res.status(404).json({message:"Application not found"});
