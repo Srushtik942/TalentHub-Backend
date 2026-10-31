@@ -450,9 +450,10 @@ const fetchStatus = async(req,res)=>{
             res.status(400).json({message:"Applicant ID is required"});
         }
 
-        const response = await Application.findOne({applicant:applicantId});
+        const applications = await Application.find({ applicant: applicantId });
 
-        if(!response){
+
+        if(!applications.length  === 0){
             res.status(404).json({message:"Application not found"});
         }
         res.status(200).json({message:"Application found", applications});
